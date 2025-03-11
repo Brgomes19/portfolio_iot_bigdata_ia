@@ -38,7 +38,7 @@ services:
     container_name: postgres_iot
     restart: always
     environment:
-      POSTGRES_USER: user
+      POSTGRES_USER: Brgomes19
       POSTGRES_PASSWORD: Lili01040@
       POSTGRES_DB: database
     ports:
