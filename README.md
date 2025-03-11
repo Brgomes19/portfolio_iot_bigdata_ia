@@ -28,6 +28,28 @@ cd portfolio_iot_bigdata_ia
 ```
 
 ### 2️⃣ Suba os serviços com Docker
+Crie o arquivo `docker-compose.yml` com o seguinte conteúdo:
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_iot
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: Lili01040@
+      POSTGRES_DB: database
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+```
+Agora execute o comando:
 ```sh
 docker-compose up -d
 ```
