@@ -11,7 +11,7 @@ Este projeto demonstra a implementação de um **pipeline de dados** que coleta 
 │-- 📂 scripts/            # Pipeline de processamento
 │-- 📄 Dockerfile          # Configuração do container
 │-- 📄 docker-compose.yml  # Orquestração dos serviços
-│-- 📄 .env                # Variáveis de ambiente
+│-- 📄 .env.example        # Exemplo de variáveis de ambiente
 │-- 📄 README.md           # Documentação do projeto
 ```
 
@@ -29,14 +29,7 @@ cd portfolio_iot_bigdata_ia
 ```
 
 ### 2️⃣ Configure o arquivo `.env`
-Crie um arquivo chamado `.env` e adicione o seguinte conteúdo:
-```env
-POSTGRES_USER=Brgomes19
-POSTGRES_PASSWORD=Lili01040@
-POSTGRES_DB=database
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-```
+Crie um arquivo chamado `.env` baseado no `.env.example` e preencha os valores adequados.
 
 ### 3️⃣ Suba os serviços com Docker
 Crie o arquivo `docker-compose.yml` com o seguinte conteúdo:
