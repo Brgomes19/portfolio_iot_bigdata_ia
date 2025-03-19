@@ -64,63 +64,69 @@ python scripts/process_data.py
 Isso carregará os dados IoT no banco de dados PostgreSQL.
 
 ### 5️⃣ Inicie o dashboard
-Crie o arquivo `app/dashboard.py` com o seguinte conteúdo:
-```python
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-from sqlalchemy import create_engine
-from dotenv import load_dotenv
-import os
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
+import requests
 
-# Carregar variáveis de ambiente do arquivo .env
-load_dotenv()
+# Configuração da API
+API_KEY = "ce6cf546f72b1a158ef7ef30f9f434da"  # Substitua pela sua chave da OpenWeatherMap
+BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 
-DB_USER = os.getenv("POSTGRES_USER")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-DB_NAME = os.getenv("POSTGRES_DB")
-DB_HOST = os.getenv("POSTGRES_HOST", "localhost")
-DB_PORT = os.getenv("POSTGRES_PORT", "5432")
+def get_weather(city):
+    params = {"q": city, "appid": API_KEY, "units": "metric", "lang": "pt"}
+    response = requests.get(BASE_URL, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        return {
+            "cidade": data["name"],
+            "temperatura": data["main"]["temp"],
+            "descricao": data["weather"][0]["description"].capitalize(),
+            "umidade": data["main"]["humidity"],
+            "vento": data["wind"]["speed"],
+        }
+    return None
 
-# Criar conexão com o banco de dados
-engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+# Inicializando o aplicativo Dash
+app = dash.Dash(__name__)
+app.title = "Previsão do Tempo"
 
-# Consulta SQL para buscar os dados
-query = "SELECT dispositivo, temperatura, timestamp FROM leituras_iot"
-df = pd.read_sql(query, engine)
+app.layout = html.Div([
+    html.H1("Previsão do Tempo"),
+    dcc.Input(id="cidade", type="text", value="São Paulo", placeholder="Digite a cidade"),
+    html.Button("Buscar", id="botao"),
+    html.Div(id="saida")
+])
 
-# Convertendo timestamp para datetime
-df["timestamp"] = pd.to_datetime(df["timestamp"])
+@app.callback(
+    Output("saida", "children"),
+    Input("botao", "n_clicks"),
+    Input("cidade", "value")
+)
+def atualizar_temperatura(n, cidade):
+    if cidade:
+        dados = get_weather(cidade)
+        if dados:
+            return html.Div([
+                html.H2(f"{dados['cidade']}") ,
+                html.P(f"Temperatura: {dados['temperatura']}°C"),
+                html.P(f"Descrição: {dados['descricao']}"),
+                html.P(f"Umidade: {dados['umidade']}%"),
+                html.P(f"Vento: {dados['vento']} m/s")
+            ])
+        else:
+            return "Cidade não encontrada!"
+    return "Digite uma cidade e clique em buscar."
 
-# 📊 **Dashboard**
-st.title("📊 Dashboard IoT - Análise de Temperatura")
+if __name__ == "__main__":
+    app.run(debug=True)
 
-# 📌 **Média de temperatura por dispositivo**
-st.subheader("Média de Temperatura por Dispositivo")
-media_temp = df.groupby("dispositivo")["temperatura"].mean().reset_index()
-fig_media = px.bar(media_temp, x="dispositivo", y="temperatura", text_auto=".2f")
-st.plotly_chart(fig_media)
-
-# 📈 **Tendência das leituras ao longo do tempo**
-st.subheader("Tendência das Leituras")
-fig_tendencia = px.line(df, x="timestamp", y="temperatura", color="dispositivo", markers=True)
-st.plotly_chart(fig_tendencia)
-
-# 🔍 **Gráficos interativos**
-st.subheader("Análise Exploratória")
-dispositivo_selecionado = st.selectbox("Escolha um dispositivo:", df["dispositivo"].unique())
-df_filtrado = df[df["dispositivo"] == dispositivo_selecionado]
-fig_interativo = px.scatter(df_filtrado, x="timestamp", y="temperatura", title=f"Temperatura do {dispositivo_selecionado}", color="temperatura")
-st.plotly_chart(fig_interativo)
-
-# Finalização
-st.write("📌 **Dashboard atualizado em tempo real!**")
 ```
 Agora, inicie o dashboard executando:
 ```sh
 streamlit run app/dashboard.py
 ```
-Acesse o dashboard no navegador: [http://localhost:8501](http://localhost:8501)
+Acesse o dashboard no navegador: [[http://localhost:8501](http://localhost:8501)](http://127.0.0.1:8050/)
 
 ## 📊 Visualização dos Dados
 O dashboard exibe:
