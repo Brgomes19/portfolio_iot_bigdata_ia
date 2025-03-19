@@ -64,66 +64,7 @@ python scripts/process_data.py
 Isso carregará os dados IoT no banco de dados PostgreSQL.
 
 ### 5️⃣ Inicie o dashboard
-import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output
-import requests
-
-# Configuração da API
-API_KEY = "ce6cf546f72b1a158ef7ef30f9f434da"  # Substitua pela sua chave da OpenWeatherMap
-BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
-
-def get_weather(city):
-    params = {"q": city, "appid": API_KEY, "units": "metric", "lang": "pt"}
-    response = requests.get(BASE_URL, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        return {
-            "cidade": data["name"],
-            "temperatura": data["main"]["temp"],
-            "descricao": data["weather"][0]["description"].capitalize(),
-            "umidade": data["main"]["humidity"],
-            "vento": data["wind"]["speed"],
-        }
-    return None
-
-# Inicializando o aplicativo Dash
-app = dash.Dash(__name__)
-app.title = "Previsão do Tempo"
-
-app.layout = html.Div([
-    html.H1("Previsão do Tempo"),
-    dcc.Input(id="cidade", type="text", value="São Paulo", placeholder="Digite a cidade"),
-    html.Button("Buscar", id="botao"),
-    html.Div(id="saida")
-])
-
-@app.callback(
-    Output("saida", "children"),
-    Input("botao", "n_clicks"),
-    Input("cidade", "value")
-)
-def atualizar_temperatura(n, cidade):
-    if cidade:
-        dados = get_weather(cidade)
-        if dados:
-            return html.Div([
-                html.H2(f"{dados['cidade']}") ,
-                html.P(f"Temperatura: {dados['temperatura']}°C"),
-                html.P(f"Descrição: {dados['descricao']}"),
-                html.P(f"Umidade: {dados['umidade']}%"),
-                html.P(f"Vento: {dados['vento']} m/s")
-            ])
-        else:
-            return "Cidade não encontrada!"
-    return "Digite uma cidade e clique em buscar."
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
-```
-Agora, inicie o dashboard executando:
-```sh
+ http://127.0.0.1:8050/
 streamlit run app/dashboard.py
 ```
 Acesse o dashboard no navegador: [[http://localhost:8501](http://localhost:8501)](http://127.0.0.1:8050/)
